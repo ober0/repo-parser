@@ -1,0 +1,1 @@
+запуск хромы: docker compose up --build -d

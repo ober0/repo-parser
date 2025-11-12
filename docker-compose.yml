@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+
+    ports:
+      - "8000:8000"
+    environment:
+      - CHROMA_SERVER_CORS_ALLOW_ORIGINS="*"
+      - ALLOW_RESET=true
+    volumes:
+      - ./chroma_data:/chroma/.chroma

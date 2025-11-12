@@ -1,0 +1,26 @@
+{
+  "name": "repo-ai-embedding",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
+    "adm-zip": "^0.5.16",
+    "chromadb": "^3.1.2",
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.8.1",
+    "process": "^0.11.10"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^24.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+  "private": true
+}
