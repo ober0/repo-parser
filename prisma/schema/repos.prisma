@@ -1,0 +1,16 @@
+model Repo {
+  id       Int @id @default(autoincrement())
+  gitlabId Int @unique
+
+  description String?
+  name        String
+  url         String
+
+  createdAt DateTime
+
+  lastActivity DateTime
+
+  chromaUpdatedAt DateTime
+
+  @@map("repos")
+}

@@ -5,10 +5,16 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "prod": "node dist/index.js",
+    "generate": "npx prisma generate --schema ./prisma/schema/",
+    "migrate:dev": "npx prisma migrate dev --schema ./prisma/schema/",
+    "migrate:deploy": "npx prisma migrate deploy --schema ./prisma/schema/",
+    "reset": "npx prisma migrate reset --force --schema ./prisma/schema/"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",
+    "@prisma/client": "^6.18.0",
     "adm-zip": "^0.5.16",
     "chromadb": "^3.1.2",
     "dotenv": "^17.2.3",
@@ -19,6 +25,7 @@
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.10.0",
+    "prisma": "^6.18.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },

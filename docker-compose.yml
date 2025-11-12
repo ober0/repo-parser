@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  chromadb:
+  chroma-ai-embedding:
     image: chromadb/chroma:latest
-
+    restart: always
     ports:
       - "8000:8000"
     environment:
@@ -11,3 +11,19 @@ services:
       - ALLOW_RESET=true
     volumes:
       - ./chroma_data:/chroma/.chroma
+
+
+  postgres-ai-embedding:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ai-embedding
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:

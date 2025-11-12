@@ -2,7 +2,7 @@ import {Dir, File, GitLabApi} from "./tools/gitlab.api";
 import {OpenaiApi} from "./tools/openai.api";
 import {ChromaClient} from "chromadb";
 
-import './chroma'
+import './tools/chroma'
 import './parse-repos'
 
 async function main(){
@@ -77,4 +77,4 @@ async function main(){
 }
 
 
-main()
+// main()

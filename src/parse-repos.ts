@@ -1,18 +1,24 @@
 import {Dir, File, GitLabApi} from "./tools/gitlab.api";
 import {OpenaiApi} from "./tools/openai.api";
 import {ChromaClient} from "chromadb";
-import {chroma} from "./chroma";
+import {chroma} from "./tools/chroma";
+import {prisma} from "./tools/prisma";
+import {Repo} from "../prisma/generated/client";
+import {debuglog} from "node:util";
 
 async function main(){
     const gitlabApi = new GitLabApi()
 
-    // TODO получить из бд список спаршеных реп
+    const repos: Repo[] = await prisma.repo.findMany()
+    const reposIds: number[] = repos.map((repo) => repo.gitlabId)
 
     const allRepos = await gitlabApi.getAllRepos()
     const openai = new OpenaiApi()
 
-
     for (let el of allRepos) {
+        if (reposIds.includes(el.id)) {
+            continue;
+        }
         console.log(`Обрабатывается репа: ${el.id}`)
 
         const fullRepo = await gitlabApi.getRepo(el.id)
@@ -21,15 +27,21 @@ async function main(){
         const traverse = (dir: Dir) => {
             for (const child of dir.children) {
                 if (child.type === 'file') {
-                    if (child.content.length > 50000) {
+                    if (child.content.length > 10000) {
                         const length = child.content.length;
-                        const batches = length % 50000 + 1
+                        const batches = length % 10000 + 1
 
                         for (let i = 0; i < batches; i++) {
-
+                            files.push({
+                                ...child,
+                                content: child.content.slice(batches*10000,(batches+1) * 10000),
+                            })
                         }
                     }
-                    files.push(child)
+                    else {
+                        files.push(child)
+                    }
+
                 } else if (child.type === 'dir') {
                     traverse(child)
                 }
@@ -41,6 +53,7 @@ async function main(){
             name: `repo-${el.id}`
         })
 
+        console.log(`Получена коллекция хрома`)
         console.log(`Файлов найдено: ${files.length}`)
 
         for (const file of files) {
@@ -52,11 +65,26 @@ async function main(){
                 metadatas: [{ path: file.name }],
                 documents: [file.content]
             })
-
-            // TODO записать в бд спаршенную репу
-
             console.log(`Добавлен: ${file.name}`)
         }
+        console.log('Репозиторий сохранен в chroma')
+
+        console.log(el)
+        const {id, description, name, web_url, created_at, last_activity_at} = el
+        await prisma.repo.create({
+            data: {
+                gitlabId: id,
+                description,
+                name,
+                url: web_url,
+                createdAt: new Date(created_at),
+                lastActivity: new Date(last_activity_at),
+                chromaUpdatedAt: new Date()
+            }
+        })
+
+        console.log("Репозиторий сохранен в бд")
+
     }
 
     // const query = '{ "PRIVATE-TOKEN": token }'

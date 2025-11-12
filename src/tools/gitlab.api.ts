@@ -1,5 +1,6 @@
 import AdmZip from "adm-zip";
 import 'dotenv/config';
+import {RepoType} from "../types/repo";
 
 export interface File {
     type: 'file';
@@ -66,7 +67,7 @@ export class GitLabApi {
         if (rest.length === 0 && !entry.isDirectory) {
             const ext = current.split('.').pop()?.toLowerCase() || '';
             const allowed = ['ts', 'js', 'json', 'yml', 'yaml'];
-            const excluded = ['tsconfig.json', 'package.json'];
+            const excluded = ['tsconfig.json', 'package.json', 'package-lock.json', 'nest-cli.json'];
 
             if (!allowed.includes(ext) || excluded.includes(current)) return;
 
@@ -92,5 +93,22 @@ export class GitLabApi {
         }
 
         this.insertEntry(dir, rest, entry);
+    }
+
+    async getAllRepos() {
+        const url = `${this.baseUrl}/projects?simple=true`;
+        const res = await fetch(url, {
+            mode: 'same-origin',
+            headers: {
+                'PRIVATE-TOKEN': this.apiToken,
+                'Accept': 'application/zip'
+            }
+        });
+
+        if (!res.ok) throw new Error(`Не удалось получить репозитории: ${res.status} ${res.statusText}`);
+
+        const response = await res.json() as unknown as RepoType[]
+
+        return response
     }
 }

@@ -1,0 +1,36 @@
+model Processing {
+  id             Int      @id @default(autoincrement())
+  processingTime DateTime @default(now())
+  commits        Commit[]
+
+  minutes Int
+
+  rating Int
+
+  review String
+
+  @@map("processing")
+}
+
+model Commit {
+  id       Int    @id @default(autoincrement())
+  gitlabId String @unique
+
+  url     String
+  message String?
+  title   String
+
+  createdAt DateTime
+
+  authorName  String
+  authorEmail String
+
+  added    String[]
+  modified String[]
+  removed  String[]
+
+  processing   Processing? @relation(fields: [processingId], references: [id])
+  processingId Int?
+
+  @@map("commit")
+}
