@@ -13,7 +13,7 @@
     "reset": "npx prisma migrate reset --force --schema ./prisma/schema/"
   },
   "dependencies": {
-    "@chroma-core/default-embed": "^0.1.8",
+    "@chroma-core/default-embed": "^0.1.9",
     "@prisma/client": "^6.18.0",
     "adm-zip": "^0.5.16",
     "body-parser": "^2.2.0",

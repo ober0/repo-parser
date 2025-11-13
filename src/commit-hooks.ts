@@ -8,10 +8,11 @@ if (!token) throw new Error('No GitLab token');
 async function processPush(hook: PayloadPushType) {
     const data = await Promise.all(
         hook.commits.map(async (commit) => {
-            const res = await fetch(`${baseUrl}projects/${hook.project.id}/repository/commits/${commit.id}/diff`, {
+            const res = await fetch(`${baseUrl}/projects/${hook.project.id}/repository/commits/${commit.id}/diff`, {
                 headers: { "PRIVATE-TOKEN": token! }
             });
             const diffResponse = await res.json();
+
 
             const diff: {
                 path: {
@@ -43,9 +44,10 @@ async function processPush(hook: PayloadPushType) {
 
 export async function hooks(hook: PayloadPushType) {
     if (hook.event_name === 'push'){
-        console.log(`Обработка события push (коммиты: ${String(hook.commits.map(el => el.id))}`)
+        console.log(`Обработка события push (коммиты: ${String(hook.commits.map(el => el.id))})`)
 
         const data = await processPush(hook)
+
         const aiResponse = await processingCommit(data, hook)
     }
 }

@@ -5,6 +5,7 @@ import {PayloadPushType} from "./types/payload";
 import {chroma} from "./tools/chroma";
 import {prisma} from "./tools/prisma";
 import { v4 as uuidv4 } from 'uuid'
+import {debuglog} from "node:util";
 
 
 export async function processingCommit(diff: {
@@ -38,7 +39,6 @@ export async function processingCommit(diff: {
                     data: string
                 }[] = []
 
-                console.log(results.documents[0].entries())
 
                 for (const [i, doc] of results.documents[0].entries()) {
                     result.push({
@@ -52,7 +52,6 @@ export async function processingCommit(diff: {
         )
         filesContent.push(data)
     }
-
 
     console.log(`Получен контекст для коммитов ${hook.commits.map(el => el.id)}`)
 
@@ -77,14 +76,21 @@ export async function processingCommit(diff: {
         }
     ]
 
+
     console.log(`Промпт сгенерирован. Символов ${JSON.stringify(prompt).length}`)
 
     let aiResponse: AiResponse
-    try{
-        aiResponse = await openai.sendAiRequest<AiResponse>(prompt)
-    }catch(err){
-        console.error(`Ошибка при запросе в ИИ: ${err}`)
-        return
+    // try{
+    //     aiResponse = await openai.sendAiRequest<AiResponse>(prompt)
+    // }catch(err){
+    //     console.error(`Ошибка при запросе в ИИ: ${err}`)
+    //     return
+    // }
+
+    aiResponse = {
+        minutes: 5,
+        rating: 10,
+        review: 'Hello'
     }
 
     console.log(`Успешно получен ответ от ИИ. Символов:  ${JSON.stringify(aiResponse).length}`)
@@ -97,6 +103,8 @@ export async function processingCommit(diff: {
         }
     })
 
+    console.log(JSON.stringify(hook.commits, null, 2))
+
     await Promise.all(
         hook.commits.map(async (commit) => {
             await prisma.commit.create({
@@ -105,7 +113,7 @@ export async function processingCommit(diff: {
                     url: commit.url,
                     message: commit.message,
                     title: commit.title,
-                    createdAt: new Date(commit.timestamp),
+                    createdAt: new Date(Number(commit.timestamp)),
                     authorName: commit.author.name,
                     authorEmail: commit.author.email,
                     added: commit.added,
@@ -131,8 +139,10 @@ export async function processingCommit(diff: {
         try {
             await collection.delete({ ids: [name] }).catch(() => null)
 
+            console.log(`${process.env.GITLAB_URL}/projects/${hook.project.id}/repository/files/${encodeURIComponent(filePath)}/raw?ref=${hook.after}`)
+
             const fileRes = await fetch(
-                `${process.env.GITLAB_URL}projects/${hook.project.id}/repository/files/${encodeURIComponent(filePath)}/raw?ref=${hook.after}`,
+                `${process.env.GITLAB_URL}/projects/${hook.project.id}/repository/files/${encodeURIComponent(filePath)}/raw?ref=main`,
                 { headers: { "PRIVATE-TOKEN": process.env.GITLAB_TOKEN! } }
             )
 

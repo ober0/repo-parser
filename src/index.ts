@@ -1,81 +1,44 @@
-import {Dir, File, GitLabApi} from "./tools/gitlab.api";
-import {OpenaiApi} from "./tools/openai.api";
-import {ChromaClient} from "chromadb";
 
 import './tools/chroma'
 // import './parse-repos'
 import './app'
+import {hooks} from "./commit-hooks";
+
 
 async function main(){
-    const gitlabApi = new GitLabApi()
-
-    const repo = await gitlabApi.getRepo(38)
-
-
-    const files: File[] = []
-    const traverse = (dir: Dir) => {
-        for (const child of dir.children) {
-            if (child.type === 'file') {
-                if (child.content.length > 50000) {
-                    const length = child.content.length;
-                    const batches = length % 50000 + 1
-
-                    for (let i = 0; i < batches; i++) {
-
-                    }
-                }
-                files.push(child)
-            } else if (child.type === 'dir') {
-                traverse(child)
-            }
-        }
-    }
-    traverse(repo)
-
-    const openai = new OpenaiApi()
-    const chroma = new ChromaClient({
-        host: "localhost",
-        port: 8000,
-        ssl: false
+    console.log(1)
+    await hooks({
+        object_kind: 'push',
+        event_name: 'push',
+        before: 'string',
+        after: 'string',
+        ref: 'string',
+        checkout_sha: 'string',
+        message: 'test 123',
+        user_id: 3,
+        user_username: '123',
+        project: {
+            id: 49,
+            name: "test-hooks",
+            web_url: "https://git.jsonb.ru/ober0/test-hooks",
+            default_branch: "main"
+        },
+        commits: [{
+            id: 'eb37407d44148b876e19c69052ae3e0ac6e86c5d',
+            message: 'merge',
+            title: 'merge',
+            timestamp: Date.now().toString(),
+            url: 'https://git.jsonb.ru/ober0/test-hooks/-/commit/eb37407d44148b876e19c69052ae3e0ac6e86c5d',
+            author: {
+                name: '123',
+                email: '123'
+            },
+            added: ['test.ts'],
+            modified: [],
+            removed: [],
+        }]
     })
-
-    const collection = await chroma.getOrCreateCollection({
-        name: 'office'
-    })
-
-    console.log(`Файлов найдено: ${files.length}`)
-
-    for (const file of files) {
-        const embedding = await openai.createEmbedding(file.content)
-
-        await collection.add({
-            ids: [file.name],
-            embeddings: [embedding],
-            metadatas: [{ path: file.name }],
-            documents: [file.content]
-        })
-
-        console.log(`Добавлен: ${file.name}`)
-    }
-
-
-    const query = '{ "PRIVATE-TOKEN": token }'
-    const queryEmbedding = await openai.createEmbedding(query)
-
-    const results = await collection.query({
-        queryEmbeddings: [queryEmbedding],
-        nResults: 3
-    })
-
-    console.log('Похожие результаты:')
-    for (const [i, doc] of results.documents[0].entries()) {
-        console.log('---')
-        console.log('Путь:', results.metadatas[0][i]?.path)
-        console.log('Фрагмент:', doc?.slice(0, 200), '...')
-    }
-
-    await openai.createEmbedding(files[0].content)
 }
 
 
-// main()
+main()
