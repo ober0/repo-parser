@@ -88,36 +88,50 @@ export async function processingCommit(diff: {
 
     console.log(`Успешно получен ответ от ИИ. Символов:  ${JSON.stringify(aiResponse).length}`)
 
-    const processingEntity = await prisma.processing.create({
-        data: {
-            minutes: aiResponse.minutes ?? 0,
-            rating: aiResponse.rating ?? 5,
-            review: aiResponse.review ?? 'Отсутствует ревью'
-        }
-    })
+    let processingEntity;
+    try{
+        processingEntity = await prisma.processing.create({
+            data: {
+                minutes: aiResponse.minutes ?? 0,
+                rating: aiResponse.rating ?? 5,
+                review: aiResponse.review ?? 'Отсутствует ревью'
+            }
+        })
+    }
+    catch(err){
+        console.error(err)
+        return
+    }
 
 
     await Promise.all(
         hook.commits.map(async (commit) => {
-            await prisma.commit.create({
-                data: {
-                    gitlabId: commit.id,
-                    url: commit.url,
-                    message: commit.message,
-                    title: commit.title,
-                    createdAt: new Date(Number(commit.timestamp)),
-                    authorName: commit.author.name,
-                    authorEmail: commit.author.email,
-                    added: commit.added,
-                    modified: commit.modified,
-                    removed: commit.removed,
-                    processing: {
-                        connect: {
-                            id: processingEntity.id
+            try{
+                await prisma.commit.create({
+                    data: {
+                        gitlabId: commit.id,
+                        url: commit.url,
+                        message: commit.message,
+                        title: commit.title,
+                        createdAt: new Date(Number(commit.timestamp)),
+                        authorName: commit.author.name,
+                        authorEmail: commit.author.email,
+                        added: commit.added,
+                        modified: commit.modified,
+                        removed: commit.removed,
+                        processing: {
+                            connect: {
+                                id: processingEntity.id
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
+            catch(err){
+                console.error(err)
+                return
+            }
+
         })
     )
 

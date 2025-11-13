@@ -1,5 +1,6 @@
 import {processingCommit} from "./commit-processing";
 import {PayloadPushType} from "./types/payload";
+import {prisma} from "./tools/prisma";
 
 const baseUrl: string = process.env.GITLAB_URL!
 const token = process.env.GITLAB_TOKEN;
@@ -46,8 +47,17 @@ export async function hooks(hook: PayloadPushType) {
     if (hook.event_name === 'push'){
         console.log(`Обработка события push (коммиты: ${String(hook.commits.map(el => el.id))})`)
 
-        const data = await processPush(hook)
+        const project = await prisma.repo.findFirst({
+            where: {gitlabId: hook.project.id}
+        })
 
-        const aiResponse = await processingCommit(data, hook)
+        if (!project) {
+            console.error(`Не спаршен проект ${hook.project.name}`)
+            return;
+        }
+
+        const diffs = await processPush(hook)
+
+        await processingCommit(diffs, hook)
     }
 }

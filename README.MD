@@ -1,1 +1,1 @@
-запуск хромы: docker compose up --build -d
+запуск хромы и докера: docker compose up --build -d

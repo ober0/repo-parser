@@ -1,6 +1,8 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import {hooks} from "./commit-hooks";
+import 'dotenv/config'
+
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -14,7 +16,8 @@ app.post('/gitlab/webhook', async (req, res) => {
 
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
-        const token = req.headers['X-Gitlab-token']
+        const token = req.headers['x-gitlab-token']
+        console.log(token, SECRET)
         if (!SECRET || token !== SECRET) {
             console.error(`Попытка отправить невалидный хук. ip: ${String(ip)}`)
             return res.status(403).send('Неверный токен')
