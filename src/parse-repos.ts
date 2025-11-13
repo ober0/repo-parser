@@ -69,7 +69,6 @@ async function main(){
         }
         console.log('Репозиторий сохранен в chroma')
 
-        console.log(el)
         const {id, description, name, web_url, created_at, last_activity_at} = el
         await prisma.repo.create({
             data: {
@@ -84,25 +83,7 @@ async function main(){
         })
 
         console.log("Репозиторий сохранен в бд")
-
     }
-
-    // const query = '{ "PRIVATE-TOKEN": token }'
-    // const queryEmbedding = await openai.createEmbedding(query)
-    //
-    // const results = await collection.query({
-    //     queryEmbeddings: [queryEmbedding],
-    //     nResults: 3
-    // })
-    //
-    // console.log('Похожие результаты:')
-    // for (const [i, doc] of results.documents[0].entries()) {
-    //     console.log('---')
-    //     console.log('Путь:', results.metadatas[0][i]?.path)
-    //     console.log('Фрагмент:', doc?.slice(0, 200), '...')
-    // }
-    //
-    // await openai.createEmbedding(files[0].content)
 }
 
 

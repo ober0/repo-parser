@@ -6,8 +6,7 @@ const token = process.env.GITLAB_TOKEN;
 if (!token) throw new Error('No GitLab token');
 
 async function processPush(hook: PayloadPushType) {
-
-    await Promise.all(
+    const data = await Promise.all(
         hook.commits.map(async (commit) => {
             const res = await fetch(`${baseUrl}projects/${hook.project.id}/repository/commits/${commit.id}/diff`, {
                 headers: { "PRIVATE-TOKEN": token! }
@@ -20,6 +19,7 @@ async function processPush(hook: PayloadPushType) {
                     new: string,
                 },
                 newFile: boolean,
+                deletedFile: boolean,
                 data: string,
             }[] = diffResponse.map((el: Record<string, string>) => {
                 return {
@@ -28,25 +28,24 @@ async function processPush(hook: PayloadPushType) {
                         new: el.new_path,
                     },
                     newFile: el.new_file,
+                    deletedFile: el.deleted_file,
                     data: el.diff,
                 }
             })
 
-            await processingCommit(diff, hook)
+            return diff
         })
     )
 
-
+    return data
 }
 
-// допустим сюда приходит отбивка от гитлаба
-async function hooks(hook: PayloadPushType) {
 
+export async function hooks(hook: PayloadPushType) {
     if (hook.event_name === 'push'){
-        await processPush(hook)
+        console.log(`Обработка события push (коммиты: ${String(hook.commits.map(el => el.id))}`)
+
+        const data = await processPush(hook)
+        const aiResponse = await processingCommit(data, hook)
     }
-
-
 }
-
-// TODO эксперсс котроллер для поимки хуков

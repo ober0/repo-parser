@@ -3,7 +3,8 @@ import {OpenaiApi} from "./tools/openai.api";
 import {ChromaClient} from "chromadb";
 
 import './tools/chroma'
-import './parse-repos'
+// import './parse-repos'
+import './app'
 
 async function main(){
     const gitlabApi = new GitLabApi()
