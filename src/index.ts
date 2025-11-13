@@ -1,18 +1,17 @@
-
 import './tools/chroma'
-// import './parse-repos'
+import './parse-repos' // если репы парсить не надо - закоментить
 import './app'
+
 import {hooks} from "./commit-hooks";
 
-
+// мок вызов хука на пуш
 async function main(){
-    console.log(1)
     await hooks({
         object_kind: 'push',
         event_name: 'push',
         before: 'string',
         after: 'string',
-        ref: 'string',
+        ref: 'refs/head/main',
         checkout_sha: 'string',
         message: 'test 123',
         user_id: 3,
