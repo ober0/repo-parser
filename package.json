@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
+    "parse": "ts-node src/parse-repos.ts",
     "prod": "node dist/index.js",
     "generate": "npx prisma generate --schema ./prisma/schema/",
     "migrate:dev": "npx prisma migrate dev --schema ./prisma/schema/",
